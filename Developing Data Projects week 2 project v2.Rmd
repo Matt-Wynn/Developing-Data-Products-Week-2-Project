@@ -1,0 +1,75 @@
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE, echo = FALSE)
+```
+## Largest Las Vegas Hotels
+Produced: 12/4/2022
+
+This map shows the top 10 largest hotels in Las Vegas by ranking of rooms. The data is derived from:
+https://easy.vegas/hotels/largest, last updated in April 2022. 
+\
+
+Of note, there are many different ways to calculate this data. For example, in some lists, the Venetian is the largest hotel by number of rooms, which includes the rooms under the Pallazo. This data set generally separates out the different hotels, with the exeption of Resorts World, possibly because all three hotels are operating different wings of the same tower/building, vs different towers/buildings/hotel names.
+
+
+## Data
+```{r, echo=FALSE}
+library(leaflet)
+```
+
+```{r, eval=TRUE, warning=FALSE}
+df <- read.csv(textConnection(
+  "Name, Rank, Rooms, Lat, Long, 
+  MGM Grand, 1, 4993, 36.10269, -115.17021,
+  Mandalay Bay, 2, 4750, 36.09222, -115.17486, 
+  Luxor, 3, 4397, 36.09559, -115.17583,
+  Venetian, 4, 4028, 36.12133, -115.16962, 
+  Aria, 5, 4002, 36.10724, -115.17797, 
+  Excalibur, 6, 3981, 36.09895, -115.17545,
+  Caesars Palace, 7, 3970, 36.11641, -115.17446,
+  Bellagio, 8, 3933, 36.11312, -115.17650, 
+  Circus Circus, 9, 3974, 36.13789, -115.16530,
+  Resorts World, 10, 3506, 36.13430, -115.16755"
+))
+df <- df[,-6]
+df[,1:3]
+
+for (i in 1:10){
+  VegasLatLong <- data.frame(
+    lat = c(df$Lat),
+    lng = c(df$Long)
+  )
+}
+```
+
+```{r, echo=FALSE}
+#popup_info <- data.frame(x = character())
+#for (i in 1:10)
+#{popup_info[i,] <- c(
+#  df[i,"Name"], "Rank: ", df[i,"Rank"], "Rooms: ", df[i,"Rooms"])
+#  }
+
+popup_info2 <- data.frame(x=character())
+for (i in 1:10)
+{popup_info2[i,1] <- paste(df[i,"Name"], "Rank: ", df[i,"Rank"], "Rooms: ", df[i,"Rooms"])}
+
+#below didn't work it just pasted each i on top of the previous ending with #10
+for (i in 1:10)
+{popup_info3 <- c(paste(df[i,"Name"], "Rank: ", df[i,"Rank"], "Rooms: ", df[i,"Rooms"]))}
+
+for (i in 1:10)
+{popup_info4 <- paste(popup_info2[i,1], sep = ",")}
+
+df_args <- c(popup_info2, sep = ",")
+popup_info5 <- do.call(paste, df_args)
+```
+
+## Map of largest Las Vegas Hotels
+
+```{r}
+VegasLatLong %>%
+  leaflet() %>%
+  addTiles() %>%
+  addMarkers(popup = popup_info5, clusterOptions = markerClusterOptions())
+```
+
